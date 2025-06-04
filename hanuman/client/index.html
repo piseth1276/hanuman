@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .students-list {
+            grid-column: 1 / -1;
+        }
+
+        .student-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: center;
+        }
+
+        .student-item:nth-child(even) {
+            background: #ffffff;
+        }
+
+        .student-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .student-field label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 2px;
+            font-weight: 500;
+        }
+
+        .student-field span {
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Student Management System</h1>
+            <p>Add and manage student information with ease</p>
+        </div>
+
+        <div class="main-content">
+            <div class="card">
+                <h2>📝 Add New Student</h2>
+                <div id="alertContainer"></div>
+                <form id="studentForm">
+                    <div class="form-group">
+                        <label for="name">Full Name *</label>
+                        <input type="text" id="name" name="name" required placeholder="Enter student's full name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" required placeholder="student@example.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="grade">Grade *</label>
+                        <select id="grade" name="grade" required>
+                            <option value="">Select Grade</option>
+                            <option value="Kindergarten">Kindergarten</option>
+                            <option value="1st Grade">1st Grade</option>
+                            <option value="2nd Grade">2nd Grade</option>
+                            <option value="3rd Grade">3rd Grade</option>
+                            <option value="4th Grade">4th Grade</option>
+                            <option value="5th Grade">5th Grade</option>
+                            <option value="6th Grade">6th Grade</option>
+                            <option value="7th Grade">7th Grade</option>
+                            <option value="8th Grade">8th Grade</option>
+                            <option value="9th Grade">9th Grade</option>
+                            <option value="10th Grade">10th Grade</option>
+                            <option value="11th Grade">11th Grade</option>
+                            <option value="12th Grade">12th Grade</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn">Add Student</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>📊 Quick Stats</h2>
+                <div id="statsContainer">
+                    <div class="loading">Loading statistics...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card students-list">
+            <h2>👥 Students List</h2>
+            <div id="studentsContainer">
+                <div class="loading">Loading students...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Base URL
+        const API_BASE = '/api';
+
+        // DOM Elements
+        const studentForm = document.getElementById('studentForm');
+        const alertContainer = document.getElementById('alertContainer');
+        const studentsContainer = document.getElementById('studentsContainer');
+        const statsContainer = document.getElementById('statsContainer');
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStudents();
+            loadStats();
+        });
+
+        // Handle form submission
+        studentForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(studentForm);
+            const studentData = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                grade: formData.get('grade')
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/students`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(studentData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert('Student added successfully!', 'success');
+                    studentForm.reset();
+                    loadStudents();
+                    loadStats();
+                } else {
+                    showAlert(result.error || 'Failed to add student', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Network error. Please try again.', 'error');
+            }
+        });        // Load students from the server
+        async function loadStudents() {
+            try {
+                const response = await fetch(`${API_BASE}/students`);
+                const result = await response.json();
+                
+                // Handle the new API response format
+                const students = result.success ? result.data : [];
+
+                if (students.length === 0) {
+                    studentsContainer.innerHTML = `
+                        <div class="empty-state">
+                            <div style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;">📚</div>
+                            <h3>No students yet</h3>
+                            <p>Add your first student using the form above!</p>
+                        </div>
+                    `;
+                } else {
+                    studentsContainer.innerHTML = students.map(student => `
+                        <div class="student-item">
+                            <div class="student-field">
+                                <label>Name</label>
+                                <span>${student.name || 'N/A'}</span>
+                            </div>
+                            <div class="student-field">
+                                <label>Email</label>
+                                <span>${student.email || 'N/A'}</span>
+                            </div>
+                            <div class="student-field">
+                                <label>Grade</label>
+                                <span>${student.grade || 'N/A'}</span>
+                            </div>
+                            <div class="student-field">
+                                <label>Added</label>
+                                <span>${formatDate(student.timestamp)}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading students:', error);
+                studentsContainer.innerHTML = '<div class="alert alert-error">Failed to load students</div>';
+            }
+        }        // Load statistics
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE}/students`);
+                const result = await response.json();
+                
+                // Handle the new API response format
+                const students = result.success ? result.data : [];
+
+                const totalStudents = students.length;
+                const gradeDistribution = {};
+                
+                students.forEach(student => {
+                    const grade = student.grade || 'Unknown';
+                    gradeDistribution[grade] = (gradeDistribution[grade] || 0) + 1;
+                });
+
+                const mostCommonGrade = Object.keys(gradeDistribution).reduce((a, b) => 
+                    gradeDistribution[a] > gradeDistribution[b] ? a : b, 'None'
+                );
+
+                statsContainer.innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; text-align: center;">
+                        <div>
+                            <div style="font-size: 2rem; color: #667eea; font-weight: bold;">${totalStudents}</div>
+                            <div style="color: #666; font-size: 0.9rem;">Total Students</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 1.2rem; color: #764ba2; font-weight: bold;">${mostCommonGrade}</div>
+                            <div style="color: #666; font-size: 0.9rem;">Most Common Grade</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 1.2rem; color: #28a745; font-weight: bold;">${Object.keys(gradeDistribution).length}</div>
+                            <div style="color: #666; font-size: 0.9rem;">Different Grades</div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                statsContainer.innerHTML = '<div class="alert alert-error">Failed to load statistics</div>';
+            }
+        }
+
+        // Show alert message
+        function showAlert(message, type) {
+            alertContainer.innerHTML = `
+                <div class="alert alert-${type}">
+                    ${message}
+                </div>
+            `;
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        // Format date for display
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+
+        // Check server health on page load
+        fetch(`${API_BASE}/health`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Server Status:', data);
+            })
+            .catch(error => {
+                console.error('Server connection error:', error);
+                showAlert('Cannot connect to server. Please ensure the backend is running.', 'error');
+            });
+    </script>
+</body>
+</html>
